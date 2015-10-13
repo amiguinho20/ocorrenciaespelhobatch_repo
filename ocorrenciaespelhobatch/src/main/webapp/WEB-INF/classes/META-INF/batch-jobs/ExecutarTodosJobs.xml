@@ -1,0 +1,24 @@
+<job id="executarTodosJobs" 
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee jobXML_1_0.xsd"
+	version="1.0" 
+	restartable="false">
+	<step id="step1" next="step2">
+		<properties>
+			<property name="javax.transaction.global.timeout" value="900"/>
+		</properties>
+		<batchlet ref="ocorrenciaEspelhoControleBatchlet"/>
+	</step>
+	<step id="step2" >
+		<properties>
+			<property name="javax.transaction.global.timeout" value="900"/>
+		</properties>
+		<chunk item-count="10" skip-limit="3">
+			<reader ref="ocorrenciaEspelhoItemReader" />
+			<processor ref="ocorrenciaEspelhoItemProcessor" />
+			<writer ref="ocorrenciaEspelhoItemWriter" />
+		</chunk>
+	</step>
+
+</job>
