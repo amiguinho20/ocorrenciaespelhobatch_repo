@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.AbstractItemReader;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,6 +42,14 @@ public class OcorrenciaEspelhoItemReader extends AbstractItemReader {
 	@Inject
 	private Converter<ControleOcorrencia> converterControleOcorrencia;
 	
+	@Inject
+	@BatchProperty(name = "inicio")
+	private String inicioProp;
+
+	@Inject
+	@BatchProperty(name = "fim")
+	private String fimProp;
+	
 	private Set<ControleOcorrencia> controleOcorrencias = new LinkedHashSet<>();
 	private Iterator<ControleOcorrencia> iteratorControleOcorrencias;
 	
@@ -54,13 +63,15 @@ public class OcorrenciaEspelhoItemReader extends AbstractItemReader {
 		port = appConfig.getServerBackendPort();
 
 		
-		logger.info("Recuperar registros para PROCESSAR e REPROCESSAR do controle...");
+		logger.info("Recuperar registros [" + inicioProp + "/" + fimProp + "] para PROCESSAR e REPROCESSAR do controle...");
 		Client client = ClientBuilder.newClient();
-		String servico = "http://" + host + ":"+ port + "/deicdivecarbackend/rest/" + 
-				"controleOcorrencia/pesquisarProcessarReprocessar";
+		String servico = "http://" + host + ":"+ port + "/ocorrenciaespelhobackend/rest/" + 
+				"espelhoOcorrenciaControle/pesquisarProcessarReprocessar/{dataInicial}/{dataFinal}";
 		WebTarget webTarget = client
 				.target(servico);
 		Response response = webTarget
+				.resolveTemplate("dataInicial", inicioProp)
+				.resolveTemplate("dataFinal", fimProp)
 				.request(MediaType.APPLICATION_JSON)
 				.get();
 		String json = response.readEntity(String.class);
@@ -76,7 +87,7 @@ public class OcorrenciaEspelhoItemReader extends AbstractItemReader {
 			controleOcorrencias = (Set<ControleOcorrencia>) converterControleOcorrencia.paraObjeto(json, collectionType);
 		}
 		iteratorControleOcorrencias = controleOcorrencias.iterator();
-		logger.info("Foram lidos [" + controleOcorrencias.size() + "] registros de controle para carga.");
+		logger.info("Foram lidos [" + controleOcorrencias.size() + "] entre as datas ["+ inicioProp + "] e [" + fimProp + "] registros de controle para carga.");
 		
 	}
 	

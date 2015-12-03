@@ -16,6 +16,7 @@ public class AppConfig implements Serializable{
 	private String serverBackendPort;
 	private String ocorrenciaRdoBackendHost;
 	private String ocorrenciaRdoBackendPort;
+	private String batchThreads;
 	
 	public String getLogConsole() {
 		return logConsole;
@@ -58,6 +59,12 @@ public class AppConfig implements Serializable{
 	}
 	public void setOcorrenciaRdoBackendPort(String ocorrenciaRdoBackendPort) {
 		this.ocorrenciaRdoBackendPort = ocorrenciaRdoBackendPort;
+	}
+	public String getBatchThreads() {
+		return batchThreads;
+	}
+	public void setBatchThreads(String batchThreads) {
+		this.batchThreads = batchThreads;
 	}
 	
 	

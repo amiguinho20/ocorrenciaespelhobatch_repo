@@ -22,6 +22,7 @@ import br.com.fences.ocorrenciaentidade.ocorrencia.Ocorrencia;
 import br.com.fences.ocorrenciaentidade.ocorrencia.auxiliar.Auxiliar;
 import br.com.fences.ocorrenciaentidade.ocorrencia.auxiliar.Point;
 import br.com.fences.ocorrenciaespelhobatch.config.AppConfig;
+import br.com.fences.ocorrenciaespelhobatch.ocorrenciaespelho.ejb.AdicionarGeocodeEJB;
 import br.com.fences.ocorrenciaespelhobatch.ocorrenciaespelho.to.OcorrenciaCompostaTO;
 
 @Named
@@ -37,7 +38,7 @@ public class OcorrenciaEspelhoItemProcessor implements ItemProcessor{
 	private VerificarErro verificarErro;
 
 	@EJB
-//	private AdicionarGeocodeEJB adicionarGeocodeEJB; //-- assincrono
+	private AdicionarGeocodeEJB adicionarGeocodeEJB; //-- assincrono
 	
 	@Inject
 	private Converter<Ocorrencia> ocorrenciaConverter;
@@ -81,7 +82,7 @@ public class OcorrenciaEspelhoItemProcessor implements ItemProcessor{
 
 		Ocorrencia ocorrencia = ocorrenciaConverter.paraObjeto(json, Ocorrencia.class);
 		
-		if (Verificador.isValorado(ocorrencia.getLatitude()) && Verificador.isValorado(ocorrencia.getLongitude()))
+		if (ocorrencia != null && Verificador.isValorado(ocorrencia.getLatitude(), ocorrencia.getLongitude()))
 		{
 			double longitude = Double.parseDouble(ocorrencia.getLongitude());
 			double latitude = Double.parseDouble(ocorrencia.getLatitude());
@@ -92,30 +93,47 @@ public class OcorrenciaEspelhoItemProcessor implements ItemProcessor{
 //			Endereco endereco = copiarEndereco(ocorrencia);
 //			adicionarGeocodeEJB.adicionarCasoNaoExista(endereco);
 		}
-		else
-		{
-			logger.info("Ocorrencia sem geocode original, consultando o cacheGeocode...");
-			
-			Endereco endereco = copiarEndereco(ocorrencia);
-			client = ClientBuilder.newClient();
-			servico = "http://" + host + ":"+ port + "/geocodebackend/rest/" + 
-					"cacheGeocode/consultar";
-			webTarget = client.target(servico);
-			response = webTarget
-					.request(MediaType.APPLICATION_JSON)
-					.post(Entity.json(endereco));
-			json = response.readEntity(String.class);
-			if (verificarErro.contemErro(response, json))
-			{
-				String msg = verificarErro.criarMensagem(response, json, servico);
-				logger.error(msg);
-				throw new RuntimeException(msg);
-			}
-
-			endereco = enderecoConverter.paraObjeto(json, Endereco.class);
-			atribuirRetorno(endereco, ocorrencia);
-			logger.info("Geocode retornado com status [" + ocorrencia.getAuxiliar().getGeocoderStatus() + "].");
-		}
+//-- 03.11.2015 - inibido para carregar mais rapido.		
+//		else
+//		{
+//			logger.info("Ocorrencia sem geocode original, consultando o cacheGeocode...");
+//			
+//			boolean sucesso = true;
+//			Endereco endereco = copiarEndereco(ocorrencia);
+//			client = ClientBuilder.newClient();
+//			servico = "http://" + host + ":"+ port + "/geocodebackend/rest/" + 
+//					"cacheGeocode/consultar";
+//			webTarget = client.target(servico);
+//			response = webTarget
+//					.request(MediaType.APPLICATION_JSON)
+//					.post(Entity.json(endereco));
+//			json = response.readEntity(String.class);
+//			if (verificarErro.contemErro(response, json))
+//			{
+//				sucesso = false;
+//				String msg = verificarErro.criarMensagem(response, json, servico);
+//				if (msg.contains("codigo[500]"))
+//				{
+//					logger.warn(msg + " PROCESSO CONTINUA A EXECUCAO...");
+//				}
+//				else
+//				{
+//					logger.error(msg);
+//					throw new RuntimeException(msg);
+//				}
+//			}
+//
+//			if (sucesso)
+//			{
+//				endereco = enderecoConverter.paraObjeto(json, Endereco.class);
+//				atribuirRetorno(endereco, ocorrencia);	
+//			}
+//			else
+//			{
+//				ocorrencia.getAuxiliar().setGeocoderStatus("PROCESSAR");
+//			}
+//			logger.info("Geocode retornado com status [" + ocorrencia.getAuxiliar().getGeocoderStatus() + "].");
+//		}
 		
 		OcorrenciaCompostaTO ocorrenciaCompostaTO = new OcorrenciaCompostaTO(ocorrencia, controleOcorrencia);
 		return ocorrenciaCompostaTO;

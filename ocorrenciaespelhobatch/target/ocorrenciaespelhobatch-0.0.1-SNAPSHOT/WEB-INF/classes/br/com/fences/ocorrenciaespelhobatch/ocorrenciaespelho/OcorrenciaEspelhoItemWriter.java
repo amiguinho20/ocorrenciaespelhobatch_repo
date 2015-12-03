@@ -59,30 +59,39 @@ public class OcorrenciaEspelhoItemWriter extends AbstractItemWriter{
 			
 			ControleOcorrencia controleOcorrencia = ocorrenciaCompostaTO.getControleOcorrencia();
 			
-			logger.info("Gravando... " + msgOcorrencia(ocorrencia));
-			String json = ocorrenciaConverter.paraJson(ocorrencia);
-			Client client = ClientBuilder.newClient();
-			String servico = "http://" + host + ":"+ port + "/ocorrenciaespelhobackend/rest/" + 
-					"espelhoOcorrencia/adicionar";
-			WebTarget webTarget = client
-					.target(servico);
-			
-			//Entity.json(ocorrencia)
-			Response response = webTarget
-					.request(MediaType.APPLICATION_JSON)
-					.put(Entity.json(json));
-			json = response.readEntity(String.class);
-			ocorrencia = ocorrenciaConverter.paraObjeto(json, Ocorrencia.class);
-			if (verificarErro.contemErro(response, json) || !Verificador.isValorado(ocorrencia.getId()))
+			if (ocorrencia == null)
 			{
+				logger.info("Gravando... " + msgOcorrencia(controleOcorrencia));
 				registrarControle(controleOcorrencia, false);
-				logger.info("Ocorrencia registrada com erro.");
+				logger.info("Ocorrencia nula registrada com erro.");
 			}
 			else
 			{
-				controleOcorrencia.setIdOcorrencia(ocorrencia.getId());
-				registrarControle(controleOcorrencia, true);
-				logger.info("Ocorrencia registrada com sucesso.");
+				logger.info("Gravando... " + msgOcorrencia(ocorrencia));
+				String json = ocorrenciaConverter.paraJson(ocorrencia);
+				Client client = ClientBuilder.newClient();
+				String servico = "http://" + host + ":"+ port + "/ocorrenciaespelhobackend/rest/" + 
+						"espelhoOcorrencia/adicionar";
+				WebTarget webTarget = client
+						.target(servico);
+				
+				//Entity.json(ocorrencia)
+				Response response = webTarget
+						.request(MediaType.APPLICATION_JSON)
+						.put(Entity.json(json));
+				json = response.readEntity(String.class);
+				ocorrencia = ocorrenciaConverter.paraObjeto(json, Ocorrencia.class);
+				if (verificarErro.contemErro(response, json) || !Verificador.isValorado(ocorrencia.getId()))
+				{
+					registrarControle(controleOcorrencia, false);
+					logger.info("Ocorrencia registrada com erro.");
+				}
+				else
+				{
+					controleOcorrencia.setIdOcorrencia(ocorrencia.getId());
+					registrarControle(controleOcorrencia, true);
+					logger.info("Ocorrencia registrada com sucesso.");
+				}
 			}
 		}
 		
@@ -104,7 +113,7 @@ public class OcorrenciaEspelhoItemWriter extends AbstractItemWriter{
 		String json = controleOcorrenciaConverter.paraJson(controleOcorrencia);
 		Client client = ClientBuilder.newClient();
 		String servico = "http://" + host + ":"+ port + "/ocorrenciaespelhobackend/rest/" + 
-				"espelhoOcorrencia/substituir";
+				"espelhoOcorrenciaControle/substituir";
 		WebTarget webTarget = client.target(servico);
 		
 		Response response = webTarget
@@ -124,6 +133,14 @@ public class OcorrenciaEspelhoItemWriter extends AbstractItemWriter{
 		String msg = ocorrencia.getNumBo() + "/" + ocorrencia.getAnoBo() + "/"
 				+ ocorrencia.getIdDelegacia() + "/"
 				+ ocorrencia.getNomeDelegacia() + "/"
+				+ ocorrencia.getDatahoraRegistroBo();
+		return msg;
+	}
+	
+	private String msgOcorrencia(ControleOcorrencia ocorrencia)
+	{
+		String msg = ocorrencia.getNumBo() + "/" + ocorrencia.getAnoBo() + "/"
+				+ ocorrencia.getIdDelegacia() + "/"
 				+ ocorrencia.getDatahoraRegistroBo();
 		return msg;
 	}

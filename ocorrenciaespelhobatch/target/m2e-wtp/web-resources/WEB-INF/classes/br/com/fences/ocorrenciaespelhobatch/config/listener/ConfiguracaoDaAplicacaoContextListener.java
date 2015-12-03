@@ -121,6 +121,7 @@ public class ConfiguracaoDaAplicacaoContextListener implements ServletContextLis
     	appConfig.setServerBackendPort(verificarCarregar("serverBackendPort"));
     	appConfig.setOcorrenciaRdoBackendHost(verificarCarregar("ocorrenciaRdoBackendHost"));
     	appConfig.setOcorrenciaRdoBackendPort(verificarCarregar("ocorrenciaRdoBackendPort"));
+    	appConfig.setBatchThreads(verificarCarregar("batchThreads"));
     }
     
     private String verificarCarregar(String propriedade)
