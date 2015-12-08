@@ -17,7 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import br.com.fences.fencesutils.formatar.FormatarData;
 import br.com.fences.fencesutils.rest.tratamentoerro.util.VerificarErro;
@@ -89,7 +88,6 @@ public class OcorrenciaEspelhoPartitionPlan implements PartitionPlan{
 		return qtd;
 	}
 
-	@Test
 	public void test()
 	{
 		getPartitionProperties();

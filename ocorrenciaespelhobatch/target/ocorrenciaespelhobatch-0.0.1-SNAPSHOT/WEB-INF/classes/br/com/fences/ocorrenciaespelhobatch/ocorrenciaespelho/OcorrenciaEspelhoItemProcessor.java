@@ -53,6 +53,7 @@ public class OcorrenciaEspelhoItemProcessor implements ItemProcessor{
 	public OcorrenciaCompostaTO processItem(Object item) throws Exception 
 	{
 		ControleOcorrencia controleOcorrencia = (ControleOcorrencia) item;
+		Ocorrencia ocorrencia = null;
 		
 		host = appConfig.getServerBackendHost();
 		port = appConfig.getServerBackendPort();
@@ -76,12 +77,15 @@ public class OcorrenciaEspelhoItemProcessor implements ItemProcessor{
 		if (verificarErro.contemErro(response, json))
 		{
 			String msg = verificarErro.criarMensagem(response, json, servico);
+			logger.error("Erro no servico de consulta da ocorrencia. Erro[" + msg + "] para o registro [" + controleOcorrencia + "]");
 			logger.error(msg);
-			throw new RuntimeException(msg);
+			//throw new RuntimeException(msg);
+		}
+		else
+		{
+			ocorrencia = ocorrenciaConverter.paraObjeto(json, Ocorrencia.class);
 		}
 
-		Ocorrencia ocorrencia = ocorrenciaConverter.paraObjeto(json, Ocorrencia.class);
-		
 		if (ocorrencia != null && Verificador.isValorado(ocorrencia.getLatitude(), ocorrencia.getLongitude()))
 		{
 			double longitude = Double.parseDouble(ocorrencia.getLongitude());
